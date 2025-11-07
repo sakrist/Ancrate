@@ -1,0 +1,5 @@
+.build
+NoteStore*
+*.sqlite*
+Package.resolved
+NotesToDo.xcodeproj/xcuserdata
