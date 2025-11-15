@@ -51,7 +51,7 @@ struct ChecklistsListView: View {
             // Header
             HStack {
                 VStack(alignment: .leading) {
-                    Text("Extracted Checklists")
+                    Text(selectedNotes.first?.title ?? "Extracted Checklists")
                         .font(.title2)
                         .fontWeight(.semibold)
                     

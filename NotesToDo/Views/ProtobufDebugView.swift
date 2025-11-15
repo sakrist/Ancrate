@@ -15,6 +15,7 @@ struct ProtobufDebugView: View {
     
     var body: some View {
         HSplitView {
+            /*
             // Left side - Debug info
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
@@ -32,7 +33,7 @@ struct ProtobufDebugView: View {
                 .padding()
             }
             .frame(minWidth: 400)
-            
+            */
             // Right side - Markdown output
             VStack(alignment: .leading, spacing: 8) {
                 HStack {

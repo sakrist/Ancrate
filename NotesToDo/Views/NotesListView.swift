@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct NotesListView: View {
-    @StateObject private var notesDatabase = NotesDatabase()
-    @State private var selectedNotes: Set<ANote> = []
+    @ObservedObject var notesDatabase: NotesDatabase
+    @Binding var selectedNotes: Set<ANote>
     @State private var searchText = ""
     
     var filteredNotes: [ANote] {
@@ -27,19 +27,19 @@ struct NotesListView: View {
         NavigationSplitView {
             VStack {
                 // Header
-                HStack {
-                    Text("Apple Notes")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                    
-                    Spacer()
-                    
-                    Button("Refresh") {
-                        notesDatabase.loadNotes()
-                    }
-                    .disabled(notesDatabase.isLoading)
-                }
-                .padding()
+//                HStack {
+//                    Text("Notes List")
+//                        .font(.title2)
+//                        .fontWeight(.semibold)
+//                    
+//                    Spacer()
+//                    
+//                    Button("Refresh") {
+//                        notesDatabase.loadNotes()
+//                    }
+//                    .disabled(notesDatabase.isLoading)
+//                }
+//                .padding()
                 
                 // Search bar
                 HStack {
@@ -213,13 +213,6 @@ struct NoteRowView: View {
                 Text(note.modificationDate, style: .relative)
                     .font(.caption2)
                     .foregroundColor(.secondary)
-                
-                if note.hasProtobufData {
-                    Spacer()
-                    Text("📄 Protobuf")
-                        .font(.caption2)
-                        .foregroundColor(.green)
-                }
             }
         }
         .padding(.vertical, 2)
@@ -232,5 +225,5 @@ struct NoteRowView: View {
 }
 
 #Preview {
-    NotesListView()
+    NotesListView(notesDatabase: NotesDatabase(), selectedNotes: .constant(Set<ANote>()))
 }

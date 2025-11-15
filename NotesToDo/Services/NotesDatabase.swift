@@ -157,18 +157,18 @@ class NotesDatabase: ObservableObject {
                     }
                     
                     // Try to decrypt or extract readable content
-                    print("Processing note data - ID: \(noteId), Title: \(title), Data length: \(encryptedData.count)")
-                    print("First 20 bytes: \(encryptedData.prefix(20).map { String(format: "%02x", $0) }.joined(separator: " "))")
+//                    print("Processing note data - ID: \(noteId), Title: \(title), Data length: \(encryptedData.count)")
+//                    print("First 20 bytes: \(encryptedData.prefix(20).map { String(format: "%02x", $0) }.joined(separator: " "))")
                     
                     // Try extracting content using our new SwiftProtobuf parser
                     if let decompressedData = tryDecompressData(encryptedData) {
-                        print("Successfully decompressed data: \(decompressedData.count) bytes")
+//                        print("Successfully decompressed data: \(decompressedData.count) bytes")
                         
                         // Use our SwiftProtobuf-based parser
                         let parsedDocument = SwiftProtobufNotesParser.parseDocument(from: decompressedData)
                         if let document = parsedDocument, document.hasNote, document.note.hasNoteText, !document.note.noteText.isEmpty {
                             let noteText = document.note.noteText
-                            print("SwiftProtobuf parser extracted: \(noteText.prefix(100))...")
+//                            print("SwiftProtobuf parser extracted: \(noteText.prefix(100))...")
                             content = noteText
                         }
                         
@@ -326,7 +326,7 @@ class NotesDatabase: ObservableObject {
                 
                 return decompressed as Data
             } catch {
-                print("Foundation zlib decompression failed: \(error)")
+//                print("Foundation zlib decompression failed: \(error)")
             }
         }
         
@@ -335,12 +335,12 @@ class NotesDatabase: ObservableObject {
             return result
         }
         
-        print("All decompression methods failed")
+//        print("All decompression methods failed")
         return nil
     }
     
     private func decompressWithZlib(_ compressedData: Data) -> Data? {
-        print("Trying zlib decompression directly...")
+//        print("Trying zlib decompression directly...")
         
         return compressedData.withUnsafeBytes { compressedBytes in
             var stream = z_stream()
@@ -386,15 +386,15 @@ class NotesDatabase: ObservableObject {
                 }
             } while stream.avail_out == 0
             
-            print("zlib decompression successful: \(compressedData.count) bytes to \(decompressedData.count) bytes")
+//            print("zlib decompression successful: \(compressedData.count) bytes to \(decompressedData.count) bytes")
             
             // Check if result looks like valid text
             if let text = String(data: decompressedData.prefix(100), encoding: .utf8) {
                 print("First 100 chars of decompressed content: \(text)")
             } else {
-                print("Decompressed data is not valid UTF-8")
+//                print("Decompressed data is not valid UTF-8")
                 let hexString = decompressedData.prefix(50).map { String(format: "%02x", $0) }.joined(separator: " ")
-                print("Decompressed data hex (first 50 bytes): \(hexString)")
+//                print("Decompressed data hex (first 50 bytes): \(hexString)")
             }
             
             return decompressedData
@@ -402,22 +402,22 @@ class NotesDatabase: ObservableObject {
     }
     
     private func parseNoteContent(_ data: Data) -> String? {
-        print("parseNoteContent called with \(data.count) bytes")
+//        print("parseNoteContent called with \(data.count) bytes")
         
         // Apple Notes content can be in various formats (protobuf, attributed text, etc.)
         // First try UTF-8 decoding
         if let content = String(data: data, encoding: .utf8) {
-            print("Successfully decoded as UTF-8, length: \(content.count)")
-            print("First 200 characters: \(content.prefix(200))")
+//            print("Successfully decoded as UTF-8, length: \(content.count)")
+//            print("First 200 characters: \(content.prefix(200))")
             let cleaned = cleanNoteContent(content)
-            print("After cleaning: \(cleaned.prefix(200))")
+//            print("After cleaning: \(cleaned.prefix(200))")
             return cleaned
         } else {
             print("Failed to decode as UTF-8")
         }
         
         // Try to find text content within the data
-        print("Trying to extract readable text from binary data")
+//        print("Trying to extract readable text from binary data")
         let result = extractReadableText(from: data)
         if let result = result {
             print("Extracted readable text: \(result.prefix(200))")

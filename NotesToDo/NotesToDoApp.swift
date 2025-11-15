@@ -10,6 +10,8 @@ import SwiftData
 
 @main
 struct NotesToDoApp: App {
+    @StateObject private var notesDatabase = NotesDatabase()
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Item.self,
@@ -25,7 +27,7 @@ struct NotesToDoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(notesDatabase: notesDatabase)
         }
         .modelContainer(sharedModelContainer)
     }
