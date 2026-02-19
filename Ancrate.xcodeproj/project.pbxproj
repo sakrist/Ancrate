@@ -28,38 +28,38 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		4F481C752EA64640008DB8DE /* NotesToDo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NotesToDo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4F481C862EA64642008DB8DE /* NotesToDoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NotesToDoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4F481C902EA64642008DB8DE /* NotesToDoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NotesToDoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F481C752EA64640008DB8DE /* Ancrate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ancrate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F481C862EA64642008DB8DE /* AncrateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AncrateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F481C902EA64642008DB8DE /* AncrateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AncrateUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		4F481C982EA64642008DB8DE /* Exceptions for "NotesToDo" folder in "NotesToDo" target */ = {
+		4F481C982EA64642008DB8DE /* Exceptions for "Ancrate" folder in "Ancrate" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 4F481C742EA64640008DB8DE /* NotesToDo */;
+			target = 4F481C742EA64640008DB8DE /* Ancrate */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		4F481C772EA64640008DB8DE /* NotesToDo */ = {
+		4F481C772EA64640008DB8DE /* Ancrate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				4F481C982EA64642008DB8DE /* Exceptions for "NotesToDo" folder in "NotesToDo" target */,
+				4F481C982EA64642008DB8DE /* Exceptions for "Ancrate" folder in "Ancrate" target */,
 			);
-			path = NotesToDo;
+			path = Ancrate;
 			sourceTree = "<group>";
 		};
-		4F481C892EA64642008DB8DE /* NotesToDoTests */ = {
+		4F481C892EA64642008DB8DE /* AncrateTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NotesToDoTests;
+			path = AncrateTests;
 			sourceTree = "<group>";
 		};
-		4F481C932EA64642008DB8DE /* NotesToDoUITests */ = {
+		4F481C932EA64642008DB8DE /* AncrateUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = NotesToDoUITests;
+			path = AncrateUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -93,9 +93,9 @@
 		4F481C6C2EA64640008DB8DE = {
 			isa = PBXGroup;
 			children = (
-				4F481C772EA64640008DB8DE /* NotesToDo */,
-				4F481C892EA64642008DB8DE /* NotesToDoTests */,
-				4F481C932EA64642008DB8DE /* NotesToDoUITests */,
+				4F481C772EA64640008DB8DE /* Ancrate */,
+				4F481C892EA64642008DB8DE /* AncrateTests */,
+				4F481C932EA64642008DB8DE /* AncrateUITests */,
 				4F481C762EA64640008DB8DE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -103,9 +103,9 @@
 		4F481C762EA64640008DB8DE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4F481C752EA64640008DB8DE /* NotesToDo.app */,
-				4F481C862EA64642008DB8DE /* NotesToDoTests.xctest */,
-				4F481C902EA64642008DB8DE /* NotesToDoUITests.xctest */,
+				4F481C752EA64640008DB8DE /* Ancrate.app */,
+				4F481C862EA64642008DB8DE /* AncrateTests.xctest */,
+				4F481C902EA64642008DB8DE /* AncrateUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -113,9 +113,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4F481C742EA64640008DB8DE /* NotesToDo */ = {
+		4F481C742EA64640008DB8DE /* Ancrate */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4F481C992EA64642008DB8DE /* Build configuration list for PBXNativeTarget "NotesToDo" */;
+			buildConfigurationList = 4F481C992EA64642008DB8DE /* Build configuration list for PBXNativeTarget "Ancrate" */;
 			buildPhases = (
 				4F481C712EA64640008DB8DE /* Sources */,
 				4F481C722EA64640008DB8DE /* Frameworks */,
@@ -126,19 +126,19 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				4F481C772EA64640008DB8DE /* NotesToDo */,
+				4F481C772EA64640008DB8DE /* Ancrate */,
 			);
-			name = NotesToDo;
+			name = Ancrate;
 			packageProductDependencies = (
 				4F7BB50B2EBA511B0027CDDB /* SwiftProtobuf */,
 			);
 			productName = NotesToDo;
-			productReference = 4F481C752EA64640008DB8DE /* NotesToDo.app */;
+			productReference = 4F481C752EA64640008DB8DE /* Ancrate.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4F481C852EA64642008DB8DE /* NotesToDoTests */ = {
+		4F481C852EA64642008DB8DE /* AncrateTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4F481C9E2EA64642008DB8DE /* Build configuration list for PBXNativeTarget "NotesToDoTests" */;
+			buildConfigurationList = 4F481C9E2EA64642008DB8DE /* Build configuration list for PBXNativeTarget "AncrateTests" */;
 			buildPhases = (
 				4F481C822EA64642008DB8DE /* Sources */,
 				4F481C832EA64642008DB8DE /* Frameworks */,
@@ -150,18 +150,18 @@
 				4F481C882EA64642008DB8DE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				4F481C892EA64642008DB8DE /* NotesToDoTests */,
+				4F481C892EA64642008DB8DE /* AncrateTests */,
 			);
-			name = NotesToDoTests;
+			name = AncrateTests;
 			packageProductDependencies = (
 			);
 			productName = NotesToDoTests;
-			productReference = 4F481C862EA64642008DB8DE /* NotesToDoTests.xctest */;
+			productReference = 4F481C862EA64642008DB8DE /* AncrateTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		4F481C8F2EA64642008DB8DE /* NotesToDoUITests */ = {
+		4F481C8F2EA64642008DB8DE /* AncrateUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4F481CA12EA64642008DB8DE /* Build configuration list for PBXNativeTarget "NotesToDoUITests" */;
+			buildConfigurationList = 4F481CA12EA64642008DB8DE /* Build configuration list for PBXNativeTarget "AncrateUITests" */;
 			buildPhases = (
 				4F481C8C2EA64642008DB8DE /* Sources */,
 				4F481C8D2EA64642008DB8DE /* Frameworks */,
@@ -173,13 +173,13 @@
 				4F481C922EA64642008DB8DE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				4F481C932EA64642008DB8DE /* NotesToDoUITests */,
+				4F481C932EA64642008DB8DE /* AncrateUITests */,
 			);
-			name = NotesToDoUITests;
+			name = AncrateUITests;
 			packageProductDependencies = (
 			);
 			productName = NotesToDoUITests;
-			productReference = 4F481C902EA64642008DB8DE /* NotesToDoUITests.xctest */;
+			productReference = 4F481C902EA64642008DB8DE /* AncrateUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -205,7 +205,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 4F481C702EA64640008DB8DE /* Build configuration list for PBXProject "NotesToDo" */;
+			buildConfigurationList = 4F481C702EA64640008DB8DE /* Build configuration list for PBXProject "Ancrate" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -222,9 +222,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4F481C742EA64640008DB8DE /* NotesToDo */,
-				4F481C852EA64642008DB8DE /* NotesToDoTests */,
-				4F481C8F2EA64642008DB8DE /* NotesToDoUITests */,
+				4F481C742EA64640008DB8DE /* Ancrate */,
+				4F481C852EA64642008DB8DE /* AncrateTests */,
+				4F481C8F2EA64642008DB8DE /* AncrateUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -280,12 +280,12 @@
 /* Begin PBXTargetDependency section */
 		4F481C882EA64642008DB8DE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4F481C742EA64640008DB8DE /* NotesToDo */;
+			target = 4F481C742EA64640008DB8DE /* Ancrate */;
 			targetProxy = 4F481C872EA64642008DB8DE /* PBXContainerItemProxy */;
 		};
 		4F481C922EA64642008DB8DE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4F481C742EA64640008DB8DE /* NotesToDo */;
+			target = 4F481C742EA64640008DB8DE /* Ancrate */;
 			targetProxy = 4F481C912EA64642008DB8DE /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -296,14 +296,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = NotesToDo/NotesToDo.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Ancrate/Ancrate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DHKZ7WR43P;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NotesToDo/Info.plist;
+				INFOPLIST_FILE = Ancrate/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -319,7 +319,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.NotesToDo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.Ancrate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -336,14 +336,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = NotesToDo/NotesToDo.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Ancrate/Ancrate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DHKZ7WR43P;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = NotesToDo/Info.plist;
+				INFOPLIST_FILE = Ancrate/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -359,7 +359,7 @@
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.NotesToDo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.Ancrate;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -498,14 +498,14 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.NotesToDoTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.AncrateTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NotesToDo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NotesToDo";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ancrate.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ancrate";
 				XROS_DEPLOYMENT_TARGET = 2.5;
 			};
 			name = Debug;
@@ -521,14 +521,14 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.NotesToDoTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.AncrateTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/NotesToDo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/NotesToDo";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ancrate.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ancrate";
 				XROS_DEPLOYMENT_TARGET = 2.5;
 			};
 			name = Release;
@@ -543,14 +543,14 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.NotesToDoUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.AncrateUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = NotesToDo;
+				TEST_TARGET_NAME = Ancrate;
 				XROS_DEPLOYMENT_TARGET = 2.5;
 			};
 			name = Debug;
@@ -565,14 +565,14 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
 				MACOSX_DEPLOYMENT_TARGET = 15.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.NotesToDoUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakrist.AncrateUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = NotesToDo;
+				TEST_TARGET_NAME = Ancrate;
 				XROS_DEPLOYMENT_TARGET = 2.5;
 			};
 			name = Release;
@@ -580,7 +580,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4F481C702EA64640008DB8DE /* Build configuration list for PBXProject "NotesToDo" */ = {
+		4F481C702EA64640008DB8DE /* Build configuration list for PBXProject "Ancrate" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4F481C9C2EA64642008DB8DE /* Debug */,
@@ -589,7 +589,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4F481C992EA64642008DB8DE /* Build configuration list for PBXNativeTarget "NotesToDo" */ = {
+		4F481C992EA64642008DB8DE /* Build configuration list for PBXNativeTarget "Ancrate" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4F481C9A2EA64642008DB8DE /* Debug */,
@@ -598,7 +598,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4F481C9E2EA64642008DB8DE /* Build configuration list for PBXNativeTarget "NotesToDoTests" */ = {
+		4F481C9E2EA64642008DB8DE /* Build configuration list for PBXNativeTarget "AncrateTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4F481C9F2EA64642008DB8DE /* Debug */,
@@ -607,7 +607,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4F481CA12EA64642008DB8DE /* Build configuration list for PBXNativeTarget "NotesToDoUITests" */ = {
+		4F481CA12EA64642008DB8DE /* Build configuration list for PBXNativeTarget "AncrateUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4F481CA22EA64642008DB8DE /* Debug */,
