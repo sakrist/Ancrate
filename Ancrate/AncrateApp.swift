@@ -11,6 +11,7 @@ import SwiftData
 @main
 struct NotesToDoApp: App {
     @StateObject private var notesDatabase = NotesDatabase()
+    @StateObject private var hotkeyService = NotesHotkeyService()
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -27,7 +28,10 @@ struct NotesToDoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(notesDatabase: notesDatabase)
+            ContentView(notesDatabase: notesDatabase, hotkeyService: hotkeyService)
+                .onAppear {
+                    hotkeyService.start()
+                }
         }
         .modelContainer(sharedModelContainer)
     }

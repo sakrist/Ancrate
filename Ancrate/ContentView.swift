@@ -10,6 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     @ObservedObject var notesDatabase: NotesDatabase
+    @ObservedObject var hotkeyService: NotesHotkeyService
     @State private var selectedNotes: Set<ANote> = []
     
     var body: some View {
@@ -25,6 +26,11 @@ struct ContentView: View {
                     .tabItem {
                         Label("Checklists", systemImage: "checklist")
                     }
+
+                ExtensionStudioView(notesDatabase: notesDatabase, hotkeyService: hotkeyService)
+                    .tabItem {
+                        Label("Extension", systemImage: "wand.and.stars")
+                    }
             }
         }
         .frame(minWidth: 800, minHeight: 600)
@@ -32,5 +38,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(notesDatabase: NotesDatabase())
+    ContentView(notesDatabase: NotesDatabase(), hotkeyService: NotesHotkeyService())
 }

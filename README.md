@@ -1,4 +1,4 @@
-# NotesToDo
+# Ancrate
 
 A lightweight SwiftUI app using SwiftData to manage notes and simple to-dos. The app stores items locally using Apple's modern SwiftData persistence and presents them with a SwiftUI interface.
 
