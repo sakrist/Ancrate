@@ -84,14 +84,14 @@ class MarkdownConverter {
         
         // Process grouped AttributeRuns sequentially to maintain order and formatting
         for runGroup in groupedRuns {
+            guard runGroup.allSatisfy({ $0.length >= 0 }) else { return noteText }
             let totalLength = runGroup.reduce(0) { $0 + Int($1.length) }
             let startIndex = currentOffset
             let endIndex = currentOffset + totalLength
             
             // Extract the text for this grouped run
             guard let text = extractTextForRun(noteText: noteText, startIndex: startIndex, endIndex: endIndex) else {
-                currentOffset += totalLength
-                continue
+                return noteText
             }
             
             // Apply styling based on the AttributeRuns in the group
@@ -100,19 +100,20 @@ class MarkdownConverter {
             markdown += styledText
             currentOffset += totalLength
         }
+
+        // Preserve text that has no trailing formatting run.
+        if let tail = extractTextForRun(noteText: noteText, startIndex: currentOffset, endIndex: noteText.utf16.count) {
+            markdown += tail
+        }
         
         return markdown
     }
     
     /// Extract text for a run group with bounds checking
     private static func extractTextForRun(noteText: String, startIndex: Int, endIndex: Int) -> String? {
-        guard endIndex <= noteText.count else {
-            return nil
-        }
-        
-        let startIdx = noteText.index(noteText.startIndex, offsetBy: startIndex)
-        let endIdx = noteText.index(noteText.startIndex, offsetBy: endIndex)
-        return String(noteText[startIdx..<endIdx])
+        guard startIndex >= 0, endIndex >= startIndex, endIndex <= noteText.utf16.count,
+              let range = Range(NSRange(location: startIndex, length: endIndex - startIndex), in: noteText) else { return nil }
+        return String(noteText[range])
     }
     
     /// Apply formatting to a run group (paragraph styles or character styles)

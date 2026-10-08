@@ -1,229 +1,101 @@
-//
-//  NotesListView.swift
-//  NotesToDo
-//
-//  Created by Volodymyr Boichentsov on 23/10/2025.
-//
-
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 struct NotesListView: View {
     @ObservedObject var notesDatabase: NotesDatabase
     @Binding var selectedNotes: Set<ANote>
+    @Binding var toDoScope: ToDoScope
     @State private var searchText = ""
-    
-    var filteredNotes: [ANote] {
-        if searchText.isEmpty {
-            return notesDatabase.notes
-        } else {
-            return notesDatabase.notes.filter { note in
-                note.title.localizedCaseInsensitiveContains(searchText) ||
-                note.content.localizedCaseInsensitiveContains(searchText)
-            }
+    @State private var focusedID: String?
+    private var filtered: [ANote] {
+        notesDatabase.notes.filter {
+            searchText.isEmpty || $0.title.localizedCaseInsensitiveContains(searchText) || $0.content.localizedCaseInsensitiveContains(searchText)
         }
     }
-    
+    private var focused: ANote? { notesDatabase.notes.first { $0.id == focusedID } }
+
     var body: some View {
-        NavigationSplitView {
-            VStack {
-                // Header
-//                HStack {
-//                    Text("Notes List")
-//                        .font(.title2)
-//                        .fontWeight(.semibold)
-//                    
-//                    Spacer()
-//                    
-//                    Button("Refresh") {
-//                        notesDatabase.loadNotes()
-//                    }
-//                    .disabled(notesDatabase.isLoading)
-//                }
-//                .padding()
-                
-                // Search bar
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
-                    TextField("Search notes...", text: $searchText)
-                        .textFieldStyle(.plain)
-                }
-                .padding(.horizontal)
-                .padding(.bottom)
-                
-                // Notes list
-                if notesDatabase.isLoading {
-                    VStack {
-                        ProgressView()
-                        Text("Loading notes...")
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if let errorMessage = notesDatabase.errorMessage {
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.title)
-                            .foregroundColor(.orange)
-                        
-                        Text("Database Access Issue")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                        
-                        Text(errorMessage)
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.secondary)
-                        
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("To fix this issue:")
-                                .fontWeight(.semibold)
-                            
-                            Text("1. Open System Preferences → Security & Privacy → Privacy")
-                            Text("2. Select 'Full Disk Access' from the left sidebar")
-                            Text("3. Click the lock icon and enter your password")
-                            Text("4. Click '+' and add this NotesToDo app")
-                            Text("5. Restart the app")
-                        }
-                        .font(.caption)
-                        .padding()
-//                        .background(Color(.blue).opacity(0.1))
-                        .cornerRadius(8)
-                        
-                        Button("Retry") {
-                            notesDatabase.loadNotes()
-                        }
-                        .buttonStyle(.borderedProminent)
-                        
-                        Button("Open System Preferences") {
-                            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
-                                NSWorkspace.shared.open(url)
-                            }
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding()
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 18) {
+                PageHeading(title: "Notes", subtitle: "Search and read your Apple Notes.")
+                    .padding(.horizontal, 20).padding(.top, 24)
+                if filtered.isEmpty {
+                    EmptyState(symbol: "note.text", title: "No notes found", detail: "Refresh your library or try another search.")
                 } else {
-                    SwiftUI.List(selection: $selectedNotes) {
-                        ForEach(filteredNotes, id: \.id) { note in
-                            NoteRowView(note: note, isSelected: selectedNotes.contains(note))
-                                .tag(note)
+                    SwiftUI.List(selection: $focusedID) {
+                        ForEach(filtered) { note in
+                            NoteLibraryRow(note: note, scope: toDoScope).tag(note.id)
+                                .padding(.vertical, 6).listRowSeparator(.hidden)
+                                .contextMenu { ToDoNoteMenu(note: note, scope: $toDoScope) }
                         }
-                    }
-                   .listStyle(.sidebar)
+                    }.listStyle(.plain).scrollContentBackground(.hidden)
                 }
-                
-                // Selection info
-                if !selectedNotes.isEmpty {
-                    HStack {
-                        Text("\(selectedNotes.count) note(s) selected")
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Button("Clear Selection") {
-                            selectedNotes.removeAll()
+            }.frame(minWidth: 280, idealWidth: 310, maxWidth: 350)
+            Divider()
+            if let note = focused {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        HStack {
+                            Label(note.folder ?? "Notes", systemImage: "folder")
+                            Spacer()
+                            Text(note.modificationDate, style: .date)
+                        }.font(.caption).foregroundStyle(.secondary)
+                        Text(note.title).font(.title).fontWeight(.semibold)
+                            .contextMenu { ToDoNoteMenu(note: note, scope: $toDoScope) }
+                        if !note.checklists.isEmpty {
+                            Label("\(note.checklists.filter { !$0.isCompleted }.count) open to-dos", systemImage: "checklist")
+                                .font(.callout).foregroundStyle(.secondary)
                         }
-                        .buttonStyle(.bordered)
-                    }
-                    .padding()
-                }
-            }
-            .navigationSplitViewColumnWidth(min: 300, ideal: 350)
-        } detail: {
-            if selectedNotes.isEmpty {
-                VStack {
-                    Image(systemName: "note.text")
-                        .font(.system(size: 60))
-                        .foregroundColor(.secondary)
-                    Text("Select notes to extract checklists")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
-                    Text("Choose one or more notes from the list to find all checklist items")
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        if !toDoScope.includes(note) {
+                            Label(toDoScope.excludedNoteIDs.contains(note.id) ? "Excluded from to-dos" : "Folder not included in to-dos",
+                                  systemImage: "eye.slash").font(.callout).foregroundStyle(.secondary)
+                        }
+                        Divider()
+                        Text(note.content).font(.body).lineSpacing(5).textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Button("Copy as Markdown", systemImage: "doc.on.doc") {
+                            #if os(macOS)
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(MarkdownConverter.convertToMarkdown(notes: [note]), forType: .string)
+                            #endif
+                        }
+                        .buttonStyle(.borderless).padding(.top, 8)
+                        let excluded = toDoScope.excludedNoteIDs.contains(note.id)
+                        Button(excluded ? "Include in to-dos" : "Exclude from to-dos", systemImage: excluded ? "checklist" : "eye.slash") {
+                            toDoScope.setExcluded(!excluded, noteID: note.id)
+                        }.buttonStyle(.borderless)
+                    }.padding(32)
+                }.frame(maxWidth: .infinity, maxHeight: .infinity).background(AncrateStyle.surface)
             } else {
-                ChecklistsListView(selectedNotes: Array(selectedNotes))
+                EmptyState(symbol: "doc.text.magnifyingglass", title: "Select a note", detail: "Choose a note to read its text and view its to-dos.")
             }
         }
-        .onAppear {
-            if notesDatabase.notes.isEmpty && notesDatabase.errorMessage == nil {
-                notesDatabase.loadNotes()
-            }
+        .background(AncrateStyle.canvas)
+        .searchable(text: $searchText, placement: .toolbar, prompt: "Search notes")
+        .onChange(of: focusedID) { _, id in
+            selectedNotes = Set(notesDatabase.notes.filter { $0.id == id })
         }
     }
 }
 
-struct NoteRowView: View {
+private struct NoteLibraryRow: View {
     let note: ANote
-    let isSelected: Bool
-    @State private var showingProtobufDebug = false
-    
+    let scope: ToDoScope
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 7) {
+            Text(note.title).font(.system(size: 14, weight: .semibold)).lineLimit(1)
+            Text(note.content.replacingOccurrences(of: "\n", with: " ")).font(.caption).foregroundStyle(.secondary).lineLimit(2)
             HStack {
-                Text(note.title)
-                    .font(.headline)
-                    .lineLimit(1)
-                
+                Text(note.folder ?? "Notes")
                 Spacer()
-                
-                // Protobuf indicator
-                if note.hasProtobufData {
-                    Button(action: {
-                        showingProtobufDebug = true
-                    }) {
-                        Image(systemName: "doc.text.magnifyingglass")
-                            .foregroundColor(.green)
-                            .font(.caption)
-                    }
-                    .buttonStyle(.plain)
-                    .help("View protobuf data")
-                }
-                
-                if note.checklists.count > 0 {
-                    Text("\(note.checklists.count) checklist\(note.checklists.count == 1 ? "" : "s")")
-                        .font(.caption)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(.blue.opacity(0.2))
-                        .foregroundColor(.blue)
-                        .clipShape(Capsule())
-                }
+                if !note.checklists.isEmpty { Label("\(note.checklists.count)", systemImage: "checklist") }
+            }.font(.caption2).foregroundStyle(.secondary)
+            if !scope.includes(note) {
+                Label(scope.excludedNoteIDs.contains(note.id) ? "Excluded from to-dos" : "Folder not included",
+                      systemImage: "eye.slash").font(.caption2).foregroundStyle(.secondary)
             }
-            
-            if let folder = note.folder, !folder.isEmpty {
-                Text(folder)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            // Show enhanced content if available from protobuf data
-            Text({
-                if note.hasProtobufData, let document = note.parsedDocument, document.hasNote, document.note.hasNoteText {
-                    return document.note.noteText
-                } else {
-                    return note.content
-                }
-            }().prefix(100))
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .lineLimit(2)
-            
-            HStack {
-                Text(note.modificationDate, style: .relative)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .padding(.vertical, 2)
-//        .background(isSelected ? Color.accentColor.opacity(0.1) : .clear)
-        .sheet(isPresented: $showingProtobufDebug) {
-            ProtobufDebugView(note: note)
-                .frame(minWidth: 1000, minHeight: 700)
         }
     }
-}
-
-#Preview {
-    NotesListView(notesDatabase: NotesDatabase(), selectedNotes: .constant(Set<ANote>()))
 }

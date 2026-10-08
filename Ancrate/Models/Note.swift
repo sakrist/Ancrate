@@ -1,10 +1,3 @@
-//
-//  Note.swift
-//  NotesToDo
-//
-//  Created by Volodymyr Boichentsov on 23/10/2025.
-//
-
 import Foundation
 import SwiftProtobuf
 
@@ -15,114 +8,63 @@ struct ANote: Identifiable, Hashable {
     let creationDate: Date
     let modificationDate: Date
     let folder: String?
+    let folderID: String?
     let rawProtobufData: Data?
-    
-    var checklists: [ChecklistItem] {
-        extractChecklistItems()
+    let checklists: [ChecklistItem]
+
+    init(id: String, title: String, content: String, creationDate: Date, modificationDate: Date,
+         folder: String?, rawProtobufData: Data?, folderID: String? = nil) {
+        self.id = id
+        self.title = title
+        self.content = content
+        self.creationDate = creationDate
+        self.modificationDate = modificationDate
+        self.folder = folder
+        self.folderID = folderID
+        self.rawProtobufData = rawProtobufData
+        checklists = Self.extractChecklists(from: rawProtobufData)
     }
-    
-    var hasProtobufData: Bool {
-        rawProtobufData != nil
-    }
-    
-    /// Parse the raw protobuf data if available
-    var parsedDocument: Document? {
-        guard let protobufData = self.rawProtobufData else { return nil }
-        return SwiftProtobufNotesParser.parseDocument(from: protobufData)
-    }
-    
-    private func extractChecklistItems() -> [ChecklistItem] {
-        // Extract checklist items directly from Document/Note structure
-        guard let document = parsedDocument, document.hasNote else { return [] }
-        
-        let note = document.note
-        let noteText = note.hasNoteText ? note.noteText : ""
-        var currentOffset = 0
-        
-        // Dictionary to group attribute runs by checklist UUID
-        var checklistRunsByUuid: [Data: [(range: Range<Int>, isCompleted: Bool)]] = [:]
-        
-        // Parse attribute runs to find checklist items and group by UUID
-        for attributeRun in note.attributeRun {
-            let length = Int(attributeRun.length)
-            let startIndex = currentOffset
-            let endIndex = currentOffset + length
-            
-            // Check if this attribute run has checklist information
-            if attributeRun.hasParagraphStyle && attributeRun.paragraphStyle.hasChecklist {
-                let checklist = attributeRun.paragraphStyle.checklist
-                
-                if checklist.hasUuid {
-                    let uuid = checklist.uuid
-                    let isCompleted = checklist.hasDone ? checklist.done != 0 : false
-                    let range = startIndex..<endIndex
-                    
-                    if checklistRunsByUuid[uuid] == nil {
-                        checklistRunsByUuid[uuid] = []
-                    }
-                    checklistRunsByUuid[uuid]?.append((range: range, isCompleted: isCompleted))
-                }
-            }
-            
-            currentOffset += length
-        }
-        
-        // Convert grouped runs into checklist items
-        var checklistItems: [ChecklistItem] = []
-        
-        for (uuid, runs) in checklistRunsByUuid {
-            // Sort runs by their start position to maintain order
-            let sortedRuns = runs.sorted { $0.range.lowerBound < $1.range.lowerBound }
-            
-            // Combine text from all runs for this checklist item
-            var combinedText = ""
-            var overallRange: Range<Int>?
-            var isCompleted = false
-            
-            for run in sortedRuns {
-                let range = run.range
-                if range.lowerBound < noteText.count && range.upperBound <= noteText.count {
-                    let startIdx = noteText.index(noteText.startIndex, offsetBy: range.lowerBound)
-                    let endIdx = noteText.index(noteText.startIndex, offsetBy: range.upperBound)
-                    let segmentText = String(noteText[startIdx..<endIdx])
-                    combinedText += segmentText
-                    
-                    // Track the overall range (from first to last segment)
-                    if overallRange == nil {
-                        overallRange = range
-                    } else {
-                        overallRange = overallRange!.lowerBound..<range.upperBound
-                    }
-                    
-                    // Use completion status from any of the runs (they should be consistent)
-                    isCompleted = run.isCompleted
-                }
-            }
-            
-            // Create checklist item if we have valid text
-            let trimmedText = combinedText.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmedText.isEmpty {
-                let checklistId = uuid.map { String(format: "%02x", $0) }.joined()
-                
-                let checklistItem = ChecklistItem(
-                    id: checklistId,
-                    text: trimmedText,
-                    isCompleted: isCompleted,
-                    uuid: uuid,
-                    lineNumber: checklistItems.count,
-                    range: overallRange
-                )
-                checklistItems.append(checklistItem)
-            }
-        }
-        
-        // Sort checklist items by their position in the note to maintain order
-        return checklistItems.sorted { 
-            guard let range1 = $0.range, let range2 = $1.range else { return false }
-            return range1.lowerBound < range2.lowerBound
+
+    var hasProtobufData: Bool { rawProtobufData != nil }
+    var parsedDocument: Document? { rawProtobufData.flatMap(SwiftProtobufNotesParser.parseDocument) }
+
+    var tasks: [TaskRecord] {
+        checklists.map { item in
+            TaskRecord(id: "\(id):\(item.id)", text: item.text, isCompleted: item.isCompleted,
+                       noteID: id, noteTitle: title, folder: folder,
+                       createdAt: creationDate, modifiedAt: modificationDate)
         }
     }
 
+    private static func extractChecklists(from data: Data?) -> [ChecklistItem] {
+        guard let data, let document = SwiftProtobufNotesParser.parseDocument(from: data), document.hasNote else { return [] }
+        let text = document.note.noteText as NSString
+        let units = Array(document.note.noteText.utf16)
+        var offset = 0
+        var groups: [Data: [(NSRange, Bool)]] = [:]
+        for run in document.note.attributeRun {
+            let length = Int(run.length)
+            guard length >= 0, offset <= text.length, length <= text.length - offset else { return [] }
+            let range = NSRange(location: offset, length: length)
+            offset += length
+            guard NSMaxRange(range) <= text.length,
+                  run.hasParagraphStyle, run.paragraphStyle.hasChecklist,
+                  run.paragraphStyle.checklist.hasUuid else { continue }
+            let checklist = run.paragraphStyle.checklist
+            groups[checklist.uuid, default: []].append((range, checklist.done != 0))
+        }
+        return groups.compactMap { uuid, runs -> ChecklistItem? in
+            let sorted = runs.sorted { $0.0.location < $1.0.location }
+            guard let first = sorted.first, let last = sorted.last else { return nil }
+            let combinedUnits = sorted.flatMap { Array(units[$0.0.location..<NSMaxRange($0.0)]) }
+            let combined = String(decoding: combinedUnits, as: UTF16.self).trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !combined.isEmpty else { return nil }
+            let line = text.substring(to: first.0.location).components(separatedBy: "\n").count - 1
+            return ChecklistItem(id: uuid.map { String(format: "%02x", $0) }.joined(), text: combined,
+                                 isCompleted: first.1, uuid: uuid, lineNumber: line,
+                                 range: first.0.location..<NSMaxRange(last.0))
+        }.sorted { ($0.range?.lowerBound ?? 0) < ($1.range?.lowerBound ?? 0) }
+    }
 }
 
 struct ChecklistItem: Identifiable, Hashable {

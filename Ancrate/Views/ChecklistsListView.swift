@@ -1,250 +1,175 @@
-//
-//  ChecklistsListView.swift
-//  NotesToDo
-//
-//  Created by Volodymyr Boichentsov on 23/10/2025.
-//
-
 import SwiftUI
+#if os(macOS)
+import AppKit
+import UniformTypeIdentifiers
+#endif
 
 struct ChecklistsListView: View {
     let selectedNotes: [ANote]
+    @Binding var toDoScope: ToDoScope
+    let manageSources: () -> Void
+    var title = "To-dos"
+    var subtitle = "Your checklists, gathered from Apple Notes."
     @State private var searchText = ""
-    @State private var showCompletedChecklists = true
-    @State private var selectedChecklistItems: Set<ChecklistItem> = []
-    
-    var allChecklists: [ChecklistWithSource] {
-        var checklists: [ChecklistWithSource] = []
-        
-        for note in selectedNotes {
-            for checklist in note.checklists {
-                checklists.append(ChecklistWithSource(checklist: checklist, sourceNote: note))
-            }
-        }
-        
-        return checklists
+    @State private var filter: TaskFilter = .open
+    @State private var selectedIDs: Set<String> = []
+    @State private var exportError: String?
+    @State private var copied = false
+
+    private enum TaskFilter: String, CaseIterable, Identifiable {
+        case open = "Open", all = "All", completed = "Completed"
+        var id: String { rawValue }
     }
-    
-    var filteredChecklists: [ChecklistWithSource] {
-        let checklistsToShow = showCompletedChecklists ? allChecklists : allChecklists.filter { !$0.checklist.isCompleted }
-        
-        if searchText.isEmpty {
-            return checklistsToShow
-        } else {
-            return checklistsToShow.filter { checklistWithSource in
-                checklistWithSource.checklist.text.localizedCaseInsensitiveContains(searchText) ||
-                checklistWithSource.sourceNote.title.localizedCaseInsensitiveContains(searchText)
-            }
+    private var allTasks: [TaskRecord] { selectedNotes.flatMap(\.tasks) }
+    private var tasks: [TaskRecord] {
+        allTasks.filter { task in
+            (filter == .all || (filter == .completed ? task.isCompleted : !task.isCompleted)) &&
+            (searchText.isEmpty || task.text.localizedCaseInsensitiveContains(searchText) || task.noteTitle.localizedCaseInsensitiveContains(searchText))
         }
     }
-    
-    var completedCount: Int {
-        allChecklists.filter { $0.checklist.isCompleted }.count
+    private var groupedNotes: [ANote] {
+        let ids = Set(tasks.map(\.noteID))
+        return selectedNotes.filter { ids.contains($0.id) }.sorted { $0.modificationDate > $1.modificationDate }
     }
-    
-    var totalCount: Int {
-        allChecklists.count
-    }
-    
+
     var body: some View {
-        VStack {
-            // Header
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(selectedNotes.first?.title ?? "Extracted Checklists")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                    
-                    Text("\(totalCount - completedCount) remaining • \(completedCount) completed")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .top) {
+                PageHeading(title: title, subtitle: subtitle)
                 Spacer()
-                
+                Button(action: manageSources) {
+                    Label("Sources", systemImage: "line.3.horizontal.decrease")
+                }.fixedSize()
                 Menu {
-                    Button(action: { copyChecklistsToClipboard() }) {
-                        Label("Copy All Checklists", systemImage: "doc.on.clipboard")
-                    }
-                    
-                    Button(action: { exportChecklists() }) {
-                        Label("Export Checklists", systemImage: "square.and.arrow.up")
-                    }
-                    
-                    Button(action: { exportAsMarkdown() }) {
-                        Label("Export as Markdown", systemImage: "doc.text")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                        .font(.title3)
-                }
-                .menuStyle(.borderlessButton)
+                    Button("Copy visible to-dos", action: copyVisible)
+                    Button("Export to-dos as Markdown", action: exportTasks)
+                    Button("Export source notes", action: exportNotes)
+                } label: { Label("Export", systemImage: "square.and.arrow.up") }
+                .fixedSize()
+                .disabled(tasks.isEmpty)
             }
-            .padding()
-            
-            // Search and filters
-            HStack {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.secondary)
-                    TextField("Search checklists...", text: $searchText)
-                        .textFieldStyle(.plain)
+            HStack(spacing: 14) {
+                MetricSummary(value: allTasks.filter { !$0.isCompleted }.count, title: "Open to-dos", symbol: "circle.dashed")
+                Divider().frame(height: 40)
+                MetricSummary(value: allTasks.filter(\.isCompleted).count, title: "Completed", symbol: "checkmark.circle")
+                Divider().frame(height: 40)
+                MetricSummary(value: Set(allTasks.map(\.noteID)).count, title: "Source notes", symbol: "note.text")
+            }.padding(.vertical, 4)
+            Divider()
+            HStack(spacing: 20) {
+                Picker("Show to-dos", selection: $filter) {
+                    ForEach(TaskFilter.allCases) { Text($0.rawValue).tag($0) }
                 }
-                
-                Toggle("Show completed", isOn: $showCompletedChecklists)
-                    .toggleStyle(.checkbox)
+                .pickerStyle(.segmented).labelsHidden().frame(width: 250)
+                Spacer()
             }
-            .padding(.horizontal)
-            
-            if filteredChecklists.isEmpty {
-                VStack {
-                    Image(systemName: allChecklists.isEmpty ? "checklist" : "magnifyingglass")
-                        .font(.system(size: 40))
-                        .foregroundColor(.secondary)
-                    
-                    Text(allChecklists.isEmpty ? "No checklists found" : "No matching checklists")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
-                    
-                    Text(allChecklists.isEmpty ? 
-                         "The selected notes don't contain any recognizable checklist items" :
-                         "Try adjusting your search terms or filters")
-                        .multilineTextAlignment(.center)
-                        .foregroundColor(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if toDoScope.restrictToSelectedFolders || !toDoScope.excludedNoteIDs.isEmpty {
+                Button(action: manageSources) {
+                    Label("To-do sources filtered · Manage", systemImage: "line.3.horizontal.decrease")
+                }.buttonStyle(.borderless).font(.caption)
+            }
+            if tasks.isEmpty {
+                EmptyState(symbol: searchText.isEmpty ? "checkmark.circle" : "magnifyingglass",
+                           title: searchText.isEmpty ? "No to-dos to show" : "No matching to-dos",
+                           detail: allTasks.isEmpty ? "Choose another time range, review your Sources, or refresh your notes."
+                               : "Try another filter or search to see more of your checklists.")
             } else {
-                // Checklists list
-                SwiftUI.List(selection: $selectedChecklistItems) {
-                    ForEach(filteredChecklists, id: \.id) { checklistWithSource in
-                        ChecklistRowView(checklistWithSource: checklistWithSource)
-                            .tag(checklistWithSource.checklist)
-                    }
-                }
-                .listStyle(.plain)
+                SwiftUI.List {
+                    ForEach(groupedNotes) { note in taskGroup(note) }
+                }.listStyle(.inset)
             }
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                if !selectedChecklistItems.isEmpty {
-                    Button("Copy Selected (\(selectedChecklistItems.count))") {
-                        copySelectedChecklistsToClipboard()
-                    }
+            HStack(spacing: 7) {
+                Image(systemName: "arrow.up.right.square")
+                Text("Check off items in Apple Notes. Ancrate reflects your changes.")
+                Spacer()
+                if copied { Text("Copied") }
+                if !selectedIDs.isEmpty {
+                    Button("Copy selected (\(selectedIDs.count))") { copy(tasks.filter { selectedIDs.contains($0.id) }) }
                 }
             }
+            .font(.caption).foregroundStyle(.secondary)
+        }
+        .padding(20).background(AncrateStyle.surface)
+        .searchable(text: $searchText, placement: .toolbar, prompt: "Search to-dos")
+        .onChange(of: tasks.map(\.id)) { _, ids in selectedIDs.formIntersection(ids) }
+        .task(id: copied) {
+            guard copied else { return }
+            try? await Task.sleep(for: .seconds(2))
+            if !Task.isCancelled { copied = false }
+        }
+        .alert("Couldn't export", isPresented: Binding(get: { exportError != nil }, set: { if !$0 { exportError = nil } })) {
+            Button("OK", role: .cancel) { exportError = nil }
+        } message: { Text(exportError ?? "") }
+    }
+
+    private func taskGroup(_ note: ANote) -> some View {
+        Section {
+            ForEach(tasks.filter { $0.noteID == note.id }) { task in
+                TaskRow(task: task, selected: selectedIDs.contains(task.id)) {
+                    if !selectedIDs.insert(task.id).inserted { selectedIDs.remove(task.id) }
+                }
+                .contextMenu { ToDoNoteMenu(note: note, scope: $toDoScope) }
+            }
+        } header: {
+            HStack(spacing: 8) {
+                Image(systemName: "note.text").foregroundStyle(.secondary)
+                Text(note.title).font(.headline)
+                if let folder = note.folder { Text(folder).font(.caption).foregroundStyle(.secondary) }
+                Spacer()
+                Text(note.modificationDate, style: .date).font(.caption).foregroundStyle(.secondary)
+            }
+                .contentShape(Rectangle())
+                .contextMenu { ToDoNoteMenu(note: note, scope: $toDoScope) }
         }
     }
-    
-    private func copyChecklistsToClipboard() {
-        let checklistText = filteredChecklists.map { checklistWithSource in
-            let checkbox = checklistWithSource.checklist.isCompleted ? "☑" : "☐"
-            return "\(checkbox) \(checklistWithSource.checklist.text) (from: \(checklistWithSource.sourceNote.title))"
-        }.joined(separator: "\n")
-        
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(checklistText, forType: .string)
+
+    private func markdown(_ items: [TaskRecord]) -> String {
+        items.map { "- [\($0.isCompleted ? "x" : " ")] \($0.text)\n  Source: \($0.noteTitle)" }.joined(separator: "\n\n")
     }
-    
-    private func copySelectedChecklistsToClipboard() {
-        let selectedChecklistTexts = filteredChecklists
-            .filter { selectedChecklistItems.contains($0.checklist) }
-            .map { checklistWithSource in
-                let checkbox = checklistWithSource.checklist.isCompleted ? "☑" : "☐"
-                return "\(checkbox) \(checklistWithSource.checklist.text) (from: \(checklistWithSource.sourceNote.title))"
-            }
-            .joined(separator: "\n")
-        
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(selectedChecklistTexts, forType: .string)
-        
-        selectedChecklistItems.removeAll()
+    private func copyVisible() { copy(tasks) }
+    private func copy(_ items: [TaskRecord]) {
+        #if os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(markdown(items), forType: .string)
+        copied = true
+        #endif
     }
-    
-    private func exportChecklists() {
-        let savePanel = NSSavePanel()
-        savePanel.title = "Export Checklists"
-        savePanel.allowedContentTypes = [.plainText]
-        savePanel.nameFieldStringValue = "checklists.txt"
-        
-        if savePanel.runModal() == .OK {
-            guard let url = savePanel.url else { return }
-            
-            let checklistText = filteredChecklists.map { checklistWithSource in
-                let checkbox = checklistWithSource.checklist.isCompleted ? "[x]" : "[ ]"
-                return "- \(checkbox) \(checklistWithSource.checklist.text)\n  Source: \(checklistWithSource.sourceNote.title)"
-            }.joined(separator: "\n\n")
-            
-            do {
-                try checklistText.write(to: url, atomically: true, encoding: .utf8)
-            } catch {
-                // Handle error - could show an alert here
-                print("Failed to export checklists: \(error)")
-            }
-        }
-    }
-    
-    private func exportAsMarkdown() {
-        let savePanel = NSSavePanel()
-        savePanel.title = "Export Notes as Markdown"
-        savePanel.allowedContentTypes = [.init(filenameExtension: "md")!]
-        savePanel.nameFieldStringValue = "notes.md"
-        
-        if savePanel.runModal() == .OK {
-            guard let url = savePanel.url else { return }
-            
-            let markdownContent = MarkdownConverter.convertToMarkdown(notes: selectedNotes)
-            
-            do {
-                try markdownContent.write(to: url, atomically: true, encoding: .utf8)
-            } catch {
-                // Handle error - could show an alert here
-                print("Failed to export markdown: \(error)")
-            }
-        }
+    private func exportTasks() { save(markdown(tasks), filename: "ancrate-to-dos.md") }
+    private func exportNotes() { save(MarkdownConverter.convertToMarkdown(notes: selectedNotes), filename: "ancrate-notes.md") }
+    private func save(_ text: String, filename: String) {
+        #if os(macOS)
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.plainText]
+        panel.nameFieldStringValue = filename
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do { try text.write(to: url, atomically: true, encoding: .utf8) }
+        catch { exportError = error.localizedDescription }
+        #endif
     }
 }
 
-struct ChecklistRowView: View {
-    let checklistWithSource: ChecklistWithSource
-    
+private struct TaskRow: View {
+    let task: TaskRecord
+    let selected: Bool
+    let select: () -> Void
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Image(systemName: checklistWithSource.checklist.isCompleted ? "checkmark.square.fill" : "square")
-                    .foregroundColor(checklistWithSource.checklist.isCompleted ? .green : .secondary)
-                    .font(.title3)
-                
-                Text(checklistWithSource.checklist.text)
-                    .strikethrough(checklistWithSource.checklist.isCompleted)
-                    .foregroundColor(checklistWithSource.checklist.isCompleted ? .secondary : .primary)
-                
-                Spacer()
+        Button(action: select) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: task.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 18))
+                    .foregroundStyle(task.isCompleted ? AncrateStyle.accent : SwiftUI.Color.secondary)
+                    .accessibilityLabel(task.isCompleted ? "Completed in Notes" : "Open in Notes")
+                Text(task.text).font(.body).lineSpacing(3)
+                    .strikethrough(task.isCompleted).foregroundStyle(task.isCompleted ? .secondary : .primary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if selected { Image(systemName: "doc.on.doc").foregroundStyle(AncrateStyle.accent) }
             }
-            
-            HStack {
-                Text("from: \(checklistWithSource.sourceNote.title)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Spacer()
-                
-                Text("line \(checklistWithSource.checklist.lineNumber + 1)")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
+            .padding(.horizontal, 6).padding(.vertical, 7)
+            .contentShape(Rectangle())
+            .background(selected ? AncrateStyle.accent.opacity(0.12) : SwiftUI.Color.clear,
+                        in: RoundedRectangle(cornerRadius: 4))
         }
-        .padding(.vertical, 2)
+        .buttonStyle(.plain)
+        .accessibilityHint("Select for copying. Completion is changed in Apple Notes.")
     }
-}
-
-struct ChecklistWithSource: Identifiable {
-    let id = UUID()
-    let checklist: ChecklistItem
-    let sourceNote: ANote
-}
-
-#Preview {
-    ChecklistsListView(selectedNotes: [])
 }
